@@ -303,17 +303,24 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       final width = textFieldSize.width;
       final height = textFieldSize.height;
       listSuggestionsEntry = new OverlayEntry(builder: (context) {
+
+        final double h = filteredSuggestions == null || filteredSuggestions.isEmpty? 0.0: filteredSuggestions.length * 30.0;
+        final double r = h > 200.0 ? 200.0 : h;
         return new Positioned(
             width: width,
             child: CompositedTransformFollower(
                 link: _layerLink,
                 showWhenUnlinked: false,
-                offset: Offset(0.0, height),
-                child: new SizedBox(
+                offset: Offset(0.0, -r),
+                child: new Container(
                     width: width,
+                    height: r,
                     child: new Card(
-                        child: new Column(
-                      children: filteredSuggestions.map((suggestion) {
+                      margin: EdgeInsets.zero,
+                        child: new ListView(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                      children: filteredSuggestions.where((element) => element!=null).map((suggestion) {
                         return new Row(children: [
                           new Expanded(
                               child: new InkWell(
@@ -372,7 +379,6 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     if (controller == null) {
       textField.controller.dispose();
     }
-    listSuggestionsEntry?.remove();
     super.dispose();
   }
 
@@ -418,6 +424,7 @@ class SimpleAutoCompleteTextField extends AutoCompleteTextField<String> {
             itemBuilder: null,
             itemSorter: null,
             itemFilter: null,
+            controller: controller,
             suggestionsAmount: suggestionsAmount,
             submitOnSuggestionTap: submitOnSuggestionTap,
             clearOnSubmit: clearOnSubmit,
@@ -435,7 +442,7 @@ class SimpleAutoCompleteTextField extends AutoCompleteTextField<String> {
       }, (a, b) {
         return a.compareTo(b);
       }, (item, query) {
-        return item.toLowerCase().startsWith(query.toLowerCase());
+        return item.toLowerCase().contains(query.toLowerCase());
       },
           suggestionsAmount,
           submitOnSuggestionTap,
